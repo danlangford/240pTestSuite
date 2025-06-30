@@ -19,6 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # fetch entire history
 
       - name: Build N64 ROM using devcontainer
         uses: devcontainers/ci@v0.3
