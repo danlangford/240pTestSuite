@@ -1,6 +1,7 @@
 name: Build N64 ROM
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - '.github/workflows/build-n64-rom.yml'
