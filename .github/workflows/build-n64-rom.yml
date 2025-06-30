@@ -31,10 +31,30 @@ jobs:
         #   FLAGS: -DVERSION_NUMBER="N64 X.XX.X"
 
 # Comment in, if/when needed.
+      - name: Determine artifact name
+        id: artifact-name
+        run: |
+          # Get latest modified file in 240psuite/N64 and format the date as YYYYMMDD
+          mod_date=$(find 240psuite/N64 -type f -printf '%T@ %p\n' | sort -n | tail -1 | awk '{print $2}' | xargs stat -c '%Y' | xargs -I{} date -d @{} +'%Y%m%d')
+
+          # Use mod_date or fallback to SHA
+          if [ -z "$mod_date" ]; then
+            # Get short SHA
+            artifact_label=$(git rev-parse --short HEAD)
+          else
+            artifact_label=$mod_date
+          fi
+
+          echo "mod_date=$mod_date" >> $GITHUB_OUTPUT
+          echo "artifact_label=$artifact_label" >> $GITHUB_OUTPUT
+
+      - name: Rename ROM file
+        run: |
+          mv ./240psuite/N64/output/240pSuite.z64 ./240psuite/N64/output/240pSuite-${{ steps.artifact-name.outputs.artifact_label }}.z64
+          
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 240pTestSuite-N64
+          name: 240pTestSuite-N64-${{ steps.artifact-name.outputs.artifact_label }}
           path: |
-            ./240psuite/N64/output/240pSuite.z64
-            ./240psuite/N64/build/240pSuite.elf
+            ./240psuite/N64/output/240pSuite*.z64
